@@ -86,24 +86,31 @@
         /* Print-Specific CSS */
         @media print {
             @page {
-                margin: 5mm;
+                margin: 5mm; /* Small uniform margin to fit standard pages */
             }
-            body {
+            body, html {
                 background-color: #ffffff;
-                padding: 0;
-                margin: 0;
+                padding: 0 !important;
+                margin: 0 !important;
             }
             .no-print-bar {
                 display: none !important;
             }
+            #labels-wrapper {
+                padding: 0;
+                margin: 0;
+            }
             .label-card {
                 max-width: 100%;
-                margin-bottom: 0;
-                page-break-inside: avoid;
+                margin: 0 auto !important; /* Removes margins that push the card down */
+                
+                /* Force the browser to keep the card on one page */
+                page-break-inside: avoid !important;
+                break-inside: avoid !important; 
                 page-break-after: always;
             }
             .label-card:last-child {
-                page-break-after: auto;
+                page-break-after: avoid; /* Prevents a blank extra page at the very end */
             }
         }
     </style>
