@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dosage Label Print</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f5f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .no-print-bar {
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-print {
+            padding: 8px 18px;
+            background-color: #0078d4;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .label-card {
+            width: 100%;
+            max-width: 650px;
+            background-color: #ffffff;
+            border: 1.5px solid #000000;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            color: #000000;
+        }
+        .section {
+            padding: 14px 24px;
+            border-bottom: 1.5px solid #000000;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .field-row {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 10px;
+            font-size: 16px;
+            line-height: 1.35;
+        }
+        .field-row:last-child {
+            margin-bottom: 0;
+        }
+        .label-top {
+            width: 155px;
+            flex-shrink: 0;
+        }
+        .colon {
+            width: 20px;
+            flex-shrink: 0;
+        }
+        .value {
+            flex-grow: 1;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 12px;
+        }
+        .instruction-section {
+            min-height: 75px;
+        }
+
+        /* Print-Specific CSS */
+        @media print {
+            @page {
+                margin: 5mm;
+            }
+            body {
+                background-color: #ffffff;
+                padding: 0;
+                margin: 0;
+            }
+            .no-print-bar {
+                display: none !important;
+            }
+            .label-card {
+                max-width: 100%;
+                margin-bottom: 0;
+                page-break-inside: avoid;
+                page-break-after: always;
+            }
+            .label-card:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print-bar">
+        <button class="btn-print" onclick="window.print()">Print Labels</button>
+    </div>
+
+    <div id="labels-wrapper" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+
+    <script>
+        (function renderLabels() {
+            const params = new URLSearchParams(window.location.search);
+            const rawData = params.get('data');
+            const autoPrint = params.get('print') === '1';
+            const wrapper = document.getElementById('labels-wrapper');
+
+            if (!rawData) {
+                wrapper.innerHTML = '<p>No label data received. Please select an Order ID in Power Apps.</p>';
+                return;
+            }
+
+            try {
+                const items = JSON.parse(rawData);
+                wrapper.innerHTML = items.map(item => `
+                    <div class="label-card">
+                        <!-- Section 1: Header & Medication Info -->
+                        <div class="section">
+                            <div class="field-row">
+                                <span class="label-top">Facility Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">${item.FacilityName || ''}</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="label-top">Patient Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">${item.PatientName || ''}</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="label-top">Doctor Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">${item.DoctorName || ''}</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="label-top">Pharmacist Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">${item.PharmacistName || ''}</span>
+                            </div>
+                            <div class="field-row">
+                                <span class="label-top">Drug Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">${item.DrugName || ''}</span>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Dates, Batch & Quantity -->
+                        <div class="section grid-2-col">
+                            <div>
+                                <div class="field-row">
+                                    <span>Prescription Date :&nbsp;</span>
+                                    <span class="value">${item.PrescriptionDate || ''}</span>
+                                </div>
+                                <div class="field-row">
+                                    <span>Expiry :&nbsp;</span>
+                                    <span class="value">${item.ExpiryDate || ''}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="field-row">
+                                    <span>Batch :&nbsp;</span>
+                                    <span class="value">${item.Batch || ''}</span>
+                                </div>
+                                <div class="field-row">
+                                    <span>Quantity :&nbsp;</span>
+                                    <span class="value">${item.Quantity ?? ''}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Additional Info -->
+                        <div class="section">
+                            <div class="field-row">
+                                <span>Additional Info :&nbsp;</span>
+                                <span class="value">${item.AdditionalInfo || ''}</span>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Instructions -->
+                        <div class="section instruction-section">
+                            <div class="field-row">
+                                <span>Instructions :&nbsp;</span>
+                                <span class="value">${item.Instructions || ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                if (autoPrint) {
+                    setTimeout(() => window.print(), 350);
+                }
+            } catch (err) {
+                wrapper.innerHTML = '<p style="color:red;">Error parsing label data: ' + err.message + '</p>';
+            }
+        })();
+    </script>
+</body>
+</html>
