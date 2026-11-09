@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dosage Label - 6x4cm Landscape</title>
+    <title>Dosage Label - 60x40mm</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; }
         body { 
@@ -19,24 +19,24 @@
         .btn-print { padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         #labels-wrapper { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
 
-        /* 60x40mm Landscape Label Container */
+        /* Exactly 60x40mm Landscape */
         .label-card {
             width: 60mm;
             height: 40mm;
             background-color: #fff;
-            border: 1px solid #000;
-            border-radius: 6px;
+            border: 1.2px solid #000; /* Restores the outer border */
+            border-radius: 4px; /* Restores the rounded corners */
             margin: 0 auto;
             overflow: hidden;
-            font-size: 6px; /* Scaled down heavily to fit 40mm height */
+            font-size: 5.5px; /* Scaled down to fit 4cm height */
             line-height: 1.15;
             display: flex;
             flex-direction: column;
         }
 
-        /* Shrunk Original Layout */
+        /* Restores the original horizontal sections */
         .section {
-            padding: 1.5px 4px;
+            padding: 1.5px 3px;
             border-bottom: 1px solid #000;
         }
         .section:last-child {
@@ -44,42 +44,48 @@
             flex-grow: 1; 
         }
 
-        .field-row { display: flex; margin-bottom: 1px; align-items: baseline; }
-        .field-row:last-child { margin-bottom: 0; }
+        .field-row { display: flex; margin-bottom: 0.5px; align-items: baseline; }
         
-        .label-top { width: 48px; flex-shrink: 0; }
-        .colon { width: 6px; flex-shrink: 0; }
+        /* Keeps the colons perfectly aligned */
+        .label-top { width: 44px; flex-shrink: 0; }
+        .colon { width: 4px; flex-shrink: 0; text-align: center; }
         
-        /* Restrict long names to 1 line, let drugs/instructions wrap */
         .value { flex-grow: 1; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .value-wrap { flex-grow: 1; font-weight: bold; word-break: break-word; }
+        .value-wrap { flex-grow: 1; font-weight: bold; word-break: break-word; white-space: normal; }
 
+        /* Restores the side-by-side grid for Dates and Qty */
         .grid-2-col {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 4px;
+            display: flex;
+            width: 100%;
+        }
+        .col-half {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* Arabic translation styling */
         .ar-text {
             direction: rtl; 
             text-align: right; 
             font-weight: bold; 
-            font-size: 7px; 
+            font-size: 6.5px; 
             margin-top: 1px;
         }
 
         /* Strict Print Override */
         @media print {
             @page {
-                size: 60mm 40mm; /* Forces landscape 6x4cm roll size */
+                size: 60mm 40mm;
                 margin: 0;
             }
             body { background-color: #fff; padding: 0; margin: 0; display: block; }
             .no-print-bar { display: none !important; }
             #labels-wrapper { gap: 0; padding: 0; display: block; }
             .label-card {
-                border: 1px solid #000; /* Keep the original design border */
-                margin: 0;
+                border: 1.2px solid #000 !important;
+                border-radius: 4px !important;
+                margin: 0 !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 page-break-after: always;
@@ -89,11 +95,9 @@
     </style>
 </head>
 <body>
-
     <div class="no-print-bar">
-        <button class="btn-print" onclick="window.print()">Print Labels (6x4 Landscape)</button>
+        <button class="btn-print" onclick="window.print()">Print Labels (6x4 cm)</button>
     </div>
-
     <div id="labels-wrapper"></div>
 
     <script>
@@ -112,7 +116,7 @@
                 for (const item of items) {
                     let arabicInst = '';
                     
-                    // Fetch Free Arabic Translation
+                    // Fetch Arabic Translation dynamically
                     if (item.Instructions) {
                         try {
                             const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(item.Instructions) + '&langpair=en|ar');
@@ -121,7 +125,7 @@
                         } catch (e) {}
                     }
 
-                    // Exact Original Layout, Miniaturized
+                    // The original layout structure restored
                     htmlContent += `
                         <div class="label-card">
                             <div class="section">
@@ -133,30 +137,26 @@
                             </div>
 
                             <div class="section grid-2-col">
-                                <div>
-                                    <div class="field-row"><span>Prescription Date :&nbsp;</span><span class="value">${item.PrescriptionDate || ''}</span></div>
-                                    <div class="field-row"><span>Expiry :&nbsp;</span><span class="value">${item.ExpiryDate || ''}</span></div>
+                                <div class="col-half">
+                                    <div class="field-row"><span style="width:52px;">Prescription Date </span><span class="colon">:</span><span class="value">${item.PrescriptionDate || ''}</span></div>
+                                    <div class="field-row"><span style="width:52px;">Expiry </span><span class="colon">:</span><span class="value">${item.ExpiryDate || ''}</span></div>
                                 </div>
-                                <div>
-                                    <div class="field-row"><span>Batch :&nbsp;</span><span class="value">${item.Batch || ''}</span></div>
-                                    <div class="field-row"><span>Quantity :&nbsp;</span><span class="value">${item.Quantity || ''}</span></div>
+                                <div class="col-half">
+                                    <div class="field-row"><span style="width:25px;">Batch </span><span class="colon">:</span><span class="value">${item.Batch || ''}</span></div>
+                                    <div class="field-row"><span style="width:25px;">Quantity </span><span class="colon">:</span><span class="value">${item.Quantity || ''}</span></div>
                                 </div>
                             </div>
 
                             <div class="section">
-                                <div class="field-row"><span>Additional Info :&nbsp;</span><span class="value">${item.AdditionalInfo || ''}</span></div>
+                                <div class="field-row"><span style="width:48px;">Additional Info </span><span class="colon">:</span><span class="value">${item.AdditionalInfo || ''}</span></div>
                             </div>
 
                             <div class="section">
-                                <div class="field-row" style="display: flex; flex-direction: column;">
-                                    <div style="display:flex; width: 100%;">
-                                        <span>Instructions :&nbsp;</span><span class="value-wrap">${item.Instructions || ''}</span>
-                                    </div>
-                                    ${arabicInst ? `
-                                    <div class="ar-text">
-                                        <span>التعليمات :&nbsp;</span><span style="font-weight:bold;">${arabicInst}</span>
-                                    </div>` : ''}
+                                <div class="field-row" style="align-items: flex-start;">
+                                    <span style="width:40px; flex-shrink:0;">Instructions </span><span class="colon">:</span>
+                                    <span class="value-wrap">${item.Instructions || ''}</span>
                                 </div>
+                                ${arabicInst ? `<div class="ar-text">التعليمات : <span style="font-weight:bold;">${arabicInst}</span></div>` : ''}
                             </div>
                         </div>
                     `;
