@@ -3,125 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dosage Label Print</title>
+    <title>Dosage Label - 4x6cm Portrait</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
+        /* Base Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            background-color: #f4f5f7; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #000;
         }
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f5f7;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .no-print-bar {
-            width: 100%;
-            max-width: 650px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .btn-print {
-            padding: 8px 18px;
-            background-color: #0078d4;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-        }
+        
+        /* UI for Browser Preview */
+        .no-print-bar { width: 100%; padding: 10px; background: #eee; text-align: center; margin-bottom: 15px; }
+        .btn-print { padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        #labels-wrapper { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+
+        /* 40x60mm Label Container */
         .label-card {
-            width: 100%;
-            max-width: 650px;
-            background-color: #ffffff;
-            border: 1.5px solid #000000;
-            border-radius: 14px;
-            margin-bottom: 24px;
+            width: 40mm;
+            height: 60mm;
+            background-color: #fff;
+            border: 1px dashed #999; /* Dashed line for preview only */
+            padding: 1.5mm 2mm;
             overflow: hidden;
-            color: #000000;
-        }
-        .section {
-            padding: 14px 24px;
-            border-bottom: 1.5px solid #000000;
-        }
-        .section:last-child {
-            border-bottom: none;
-        }
-        .field-row {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 10px;
-            font-size: 16px;
-            line-height: 1.35;
-        }
-        .field-row:last-child {
-            margin-bottom: 0;
-        }
-        .label-top {
-            width: 155px;
-            flex-shrink: 0;
-        }
-        .colon {
-            width: 20px;
-            flex-shrink: 0;
-        }
-        .value {
-            flex-grow: 1;
-            font-weight: 500;
-            word-break: break-word;
-        }
-        .grid-2-col {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 12px;
-        }
-        .instruction-section {
-            min-height: 75px;
+            font-size: 7.5px; /* Extremely small text for 40mm width */
+            line-height: 1.25;
         }
 
-        /* Print-Specific CSS */
+        /* Compact Layout Structure */
+        .header { text-align: center; font-weight: bold; font-size: 8.5px; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; }
+        .row { display: flex; margin-bottom: 1px; }
+        .lbl { font-weight: bold; margin-right: 2px; flex-shrink: 0; }
+        .val { flex-grow: 1; word-wrap: break-word; }
+        
+        .drug-row { font-weight: bold; font-size: 8px; border-bottom: 1px dashed #000; padding-bottom: 2px; margin-bottom: 2px; margin-top: 1px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 2px; }
+        .grid .row { margin-bottom: 0; }
+        
+        .inst-eng { font-weight: bold; font-size: 8px; }
+        .inst-ar { direction: rtl; text-align: right; font-weight: bold; font-size: 9px; margin-top: 1px; }
+
+        /* Strict Print Override */
         @media print {
             @page {
-                margin: 5mm; /* Small uniform margin to fit standard pages */
-            }
-            body, html {
-                background-color: #ffffff;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .no-print-bar {
-                display: none !important;
-            }
-            #labels-wrapper {
-                padding: 0;
+                size: 40mm 60mm; /* Forces the printer to recognize the exact physical roll size */
                 margin: 0;
             }
+            body { background-color: #fff; padding: 0; margin: 0; display: block; }
+            .no-print-bar { display: none !important; }
+            #labels-wrapper { gap: 0; padding: 0; display: block; }
             .label-card {
-                max-width: 100%;
-                margin: 0 auto !important; /* Removes margins that push the card down */
-                
-                /* Force the browser to keep the card on one page */
+                border: none; /* Remove preview dashed border */
+                margin: 0;
                 page-break-inside: avoid !important;
-                break-inside: avoid !important; 
+                break-inside: avoid !important;
                 page-break-after: always;
             }
-            .label-card:last-child {
-                page-break-after: avoid; /* Prevents a blank extra page at the very end */
-            }
+            .label-card:last-child { page-break-after: avoid; }
         }
     </style>
 </head>
 <body>
 
     <div class="no-print-bar">
-        <button class="btn-print" onclick="window.print()">Print Labels</button>
+        <button class="btn-print" onclick="window.print()">Print Labels (6x4 Portrait)</button>
     </div>
 
-    <div id="labels-wrapper" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+    <div id="labels-wrapper"></div>
 
     <script>
         (async function renderLabels() {
@@ -130,10 +82,7 @@
             const autoPrint = params.get('print') === '1';
             const wrapper = document.getElementById('labels-wrapper');
 
-            if (!rawData) {
-                wrapper.innerHTML = '<p>No label data received. Please select an Order ID.</p>';
-                return;
-            }
+            if (!rawData) return wrapper.innerHTML = '<p>No label data received.</p>';
 
             try {
                 const items = JSON.parse(rawData);
@@ -142,78 +91,45 @@
                 for (const item of items) {
                     let arabicInst = '';
                     
-                    // 1. Fetch free Arabic translation dynamically without saving it
+                    // Fetch Arabic Translation
                     if (item.Instructions) {
                         try {
                             const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(item.Instructions) + '&langpair=en|ar');
                             const tData = await res.json();
-                            if (tData && tData.responseData && tData.responseData.translatedText) {
-                                arabicInst = tData.responseData.translatedText;
-                            }
-                        } catch (err) {
-                            console.error("Translation failed", err);
-                        }
+                            if (tData?.responseData?.translatedText) arabicInst = tData.responseData.translatedText;
+                        } catch (e) {}
                     }
 
-                    // 2. Build the HTML label
+                    // Compact HTML Card
                     htmlContent += `
                         <div class="label-card">
-                            <!-- Section 1: Header -->
-                            <div class="section">
-                                <div class="field-row"><span class="label-top">Facility Name</span><span class="colon">:</span><span class="value">${item.FacilityName || ''}</span></div>
-                                <div class="field-row"><span class="label-top">Patient Name</span><span class="colon">:</span><span class="value">${item.PatientName || ''}</span></div>
-                                <div class="field-row"><span class="label-top">Doctor Name</span><span class="colon">:</span><span class="value">${item.DoctorName || ''}</span></div>
-                                <div class="field-row"><span class="label-top">Pharmacist Name</span><span class="colon">:</span><span class="value">${item.PharmacistName || ''}</span></div>
-                                <div class="field-row"><span class="label-top">Drug Name</span><span class="colon">:</span><span class="value">${item.DrugName || ''}</span></div>
+                            <div class="header">${item.FacilityName || 'Pharmacy'}</div>
+                            <div class="row"><span class="lbl">Pt:</span><span class="val">${item.PatientName || ''}</span></div>
+                            <div class="row"><span class="lbl">Dr:</span><span class="val">${item.DoctorName || ''}</span></div>
+                            <div class="row"><span class="lbl">Ph:</span><span class="val">${item.PharmacistName || ''}</span></div>
+                            
+                            <div class="drug-row">${item.DrugName || ''}</div>
+                            
+                            <div class="grid">
+                                <div class="row"><span class="lbl">Rx:</span><span class="val">${item.PrescriptionDate || ''}</span></div>
+                                <div class="row"><span class="lbl">Qty:</span><span class="val">${item.Quantity || ''}</span></div>
+                                <div class="row"><span class="lbl">Exp:</span><span class="val">${item.ExpiryDate || ''}</span></div>
+                                <div class="row"><span class="lbl">Lot:</span><span class="val">${item.Batch || ''}</span></div>
                             </div>
-
-                            <!-- Section 2: Dates -->
-                            <div class="section grid-2-col">
-                                <div>
-                                    <div class="field-row"><span>Prescription Date :&nbsp;</span><span class="value">${item.PrescriptionDate || ''}</span></div>
-                                    <div class="field-row"><span>Expiry :&nbsp;</span><span class="value">${item.ExpiryDate || ''}</span></div>
-                                </div>
-                                <div>
-                                    <div class="field-row"><span>Batch :&nbsp;</span><span class="value">${item.Batch || ''}</span></div>
-                                    <div class="field-row"><span>Quantity :&nbsp;</span><span class="value">${item.Quantity ?? ''}</span></div>
-                                </div>
-                            </div>
-
-                            <!-- Section 3: Additional Info -->
-                            <div class="section">
-                                <div class="field-row"><span>Additional Info :&nbsp;</span><span class="value">${item.AdditionalInfo || ''}</span></div>
-                            </div>
-
-                            <!-- Section 4: Bilingual Instructions -->
-                            <div class="section instruction-section">
-                                <div class="field-row" style="display: flex; flex-direction: column; width: 100%;">
-                                    <div style="display: flex; width: 100%; margin-bottom: 6px;">
-                                        <span>Instructions :&nbsp;</span><span class="value">${item.Instructions || ''}</span>
-                                    </div>
-                                    ${arabicInst ? `
-                                    <div style="display: flex; width: 100%; direction: rtl; text-align: right; font-size: 18px; margin-top: 4px;">
-                                        <span>التعليمات :&nbsp;</span>
-                                        <span class="value" style="font-weight: bold;">${arabicInst}</span>
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            </div>
+                            
+                            <div class="inst-eng">Sig: ${item.Instructions || ''}</div>
+                            ${arabicInst ? `<div class="inst-ar">${arabicInst}</div>` : ''}
                         </div>
                     `;
                 }
 
                 wrapper.innerHTML = htmlContent;
-
-                // 3. Print automatically after a short delay so translations have time to render
-                if (autoPrint) {
-                    setTimeout(() => window.print(), 600);
-                }
+                if (autoPrint) setTimeout(() => window.print(), 600);
 
             } catch (err) {
-                wrapper.innerHTML = '<p style="color:red;">Error parsing label data: ' + err.message + '</p>';
+                wrapper.innerHTML = '<p style="color:red;">Error: ' + err.message + '</p>';
             }
         })();
     </script>
-    
 </body>
 </html>
