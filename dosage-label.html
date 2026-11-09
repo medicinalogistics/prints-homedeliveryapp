@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dosage Label - 60x40mm Landscape</title>
+    <title>Dosage Label - 100x50mm</title>
     <style>
-        /* Base Reset */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; }
         body { 
             background-color: #f4f5f7; 
             display: flex; 
@@ -17,76 +16,77 @@
         
         /* UI for Browser Preview */
         .no-print-bar { width: 100%; padding: 10px; background: #eee; text-align: center; margin-bottom: 15px; }
-        .btn-print { padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-print { padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
         #labels-wrapper { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
 
-        /* Exactly 60x40mm Landscape Container */
+        /* Exactly 100x50mm Landscape Container */
         .label-card {
-            width: 60mm;
-            height: 40mm;
+            width: 100mm;
+            height: 50mm;
             background-color: #fff;
-            border: 1px solid #d3d3d3; /* Subtle border for screen preview */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 2mm 2.5mm; /* Tight padding to maximize space */
+            border: 1.5px solid #000;
+            border-radius: 8px; /* Restores the rounded corners */
+            margin: 0 auto;
             overflow: hidden;
-            font-size: 7.5px;
-            line-height: 1.25;
+            font-size: 9px; /* Scaled up for 10x5cm */
+            line-height: 1.35;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Layout Structure matching the uploaded image */
-        .header { 
-            text-align: center; 
+        /* Restores the original horizontal sections */
+        .section {
+            padding: 3px 8px;
+            border-bottom: 1.5px solid #000;
+        }
+        .section:last-child {
+            border-bottom: none;
+            flex-grow: 1; 
+        }
+
+        .field-row { display: flex; margin-bottom: 1px; align-items: baseline; }
+        .field-row:last-child { margin-bottom: 0; }
+        
+        /* Ensures colons are vertically aligned */
+        .label-top { width: 90px; flex-shrink: 0; }
+        .colon { width: 12px; flex-shrink: 0; text-align: center; }
+        
+        .value { flex-grow: 1; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .value-wrap { flex-grow: 1; font-weight: bold; word-break: break-word; white-space: normal; }
+
+        /* Side-by-side grid for Dates, Batch, and Qty */
+        .grid-2-col {
+            display: flex;
+            width: 100%;
+        }
+        .col-half {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Arabic translation styling */
+        .ar-text {
+            direction: rtl; 
+            text-align: right; 
             font-weight: bold; 
-            font-size: 9.5px; 
-            padding-bottom: 2px; 
-            margin-bottom: 2px; 
-            border-bottom: 1.5px solid #000; 
-            white-space: nowrap; 
-            overflow: hidden; 
+            font-size: 10px; 
+            margin-top: 3px;
         }
-        .row { display: flex; margin-bottom: 0.5px; }
-        .lbl { font-weight: bold; margin-right: 2px; }
-        .val { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .drug-row { 
-            font-weight: bold; 
-            font-size: 8.5px; 
-            margin-top: 1px; 
-            padding-bottom: 2px; 
-            margin-bottom: 2px; 
-            border-bottom: 1px dashed #000; 
-            text-transform: uppercase; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis;
-        }
-        
-        .grid { 
-            display: flex; 
-            flex-direction: column; 
-            padding-bottom: 2px; 
-            margin-bottom: 2px; 
-            border-bottom: 1.5px solid #000; 
-        }
-        .grid-row { display: flex; justify-content: space-between; margin-bottom: 0.5px; }
-        .grid-item { display: flex; width: 48%; }
-        
-        .inst-eng { font-weight: bold; font-size: 7.5px; white-space: normal; }
-        .inst-ar { direction: rtl; text-align: right; font-weight: bold; font-size: 8.5px; margin-top: 2px; }
 
         /* Strict Print Override */
         @media print {
-            @page { 
-                size: 60mm 40mm; /* Forces 6x4 landscape orientation */
-                margin: 0; 
+            @page {
+                size: 100mm 50mm; /* Forces 10x5cm layout to the printer */
+                margin: 0;
             }
             body { background-color: #fff; padding: 0; margin: 0; display: block; }
             .no-print-bar { display: none !important; }
             #labels-wrapper { gap: 0; padding: 0; display: block; }
             .label-card {
-                border: none;
-                box-shadow: none;
-                margin: 0;
+                border: 1.5px solid #000 !important;
+                border-radius: 8px !important;
+                margin: 0 !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 page-break-after: always;
@@ -96,11 +96,9 @@
     </style>
 </head>
 <body>
-
     <div class="no-print-bar">
-        <button class="btn-print" onclick="window.print()">Print Labels (6x4 cm Landscape)</button>
+        <button class="btn-print" onclick="window.print()">Print Labels (10x5 cm)</button>
     </div>
-
     <div id="labels-wrapper"></div>
 
     <script>
@@ -110,7 +108,7 @@
             const autoPrint = params.get('print') === '1';
             const wrapper = document.getElementById('labels-wrapper');
 
-            if (!rawData) return wrapper.innerHTML = '<p style="padding:20px;">No label data received.</p>';
+            if (!rawData) return wrapper.innerHTML = '<p style="padding: 20px;">No label data received.</p>';
 
             try {
                 const items = JSON.parse(rawData);
@@ -128,30 +126,39 @@
                         } catch (e) {}
                     }
 
-                    // HTML Card strictly matching the image layout
+                    // Original Design with full text names
                     htmlContent += `
                         <div class="label-card">
-                            <div class="header">${item.FacilityName || 'Pharmacy'}</div>
-                            
-                            <div class="row"><span class="lbl">Pt:</span><span class="val">${item.PatientName || ''}</span></div>
-                            <div class="row"><span class="lbl">Dr:</span><span class="val">${item.DoctorName || ''}</span></div>
-                            <div class="row"><span class="lbl">Ph:</span><span class="val">${item.PharmacistName || ''}</span></div>
-                            
-                            <div class="drug-row">${item.DrugName || ''}</div>
-                            
-                            <div class="grid">
-                                <div class="grid-row">
-                                    <div class="grid-item"><span class="lbl">Rx:</span><span class="val">${item.PrescriptionDate || ''}</span></div>
-                                    <div class="grid-item"><span class="lbl">Qty:</span><span class="val">${item.Quantity || ''}</span></div>
+                            <div class="section">
+                                <div class="field-row"><span class="label-top">Facility Name</span><span class="colon">:</span><span class="value">${item.FacilityName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Patient Name</span><span class="colon">:</span><span class="value">${item.PatientName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Doctor Name</span><span class="colon">:</span><span class="value">${item.DoctorName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Pharmacist Name</span><span class="colon">:</span><span class="value">${item.PharmacistName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Drug Name</span><span class="colon">:</span><span class="value-wrap">${item.DrugName || ''}</span></div>
+                            </div>
+
+                            <div class="section grid-2-col">
+                                <div class="col-half">
+                                    <div class="field-row"><span style="width:85px;">Prescription Date </span><span class="colon">:</span><span class="value">${item.PrescriptionDate || ''}</span></div>
+                                    <div class="field-row"><span style="width:85px;">Expiry </span><span class="colon">:</span><span class="value">${item.ExpiryDate || ''}</span></div>
                                 </div>
-                                <div class="grid-row">
-                                    <div class="grid-item"><span class="lbl">Exp:</span><span class="val">${item.ExpiryDate || ''}</span></div>
-                                    <div class="grid-item"><span class="lbl">Lot:</span><span class="val">${item.Batch || ''}</span></div>
+                                <div class="col-half">
+                                    <div class="field-row"><span style="width:45px;">Batch </span><span class="colon">:</span><span class="value">${item.Batch || ''}</span></div>
+                                    <div class="field-row"><span style="width:45px;">Quantity </span><span class="colon">:</span><span class="value">${item.Quantity || ''}</span></div>
                                 </div>
                             </div>
-                            
-                            <div class="inst-eng"><span class="lbl">Sig:</span> ${item.Instructions || ''}</div>
-                            ${arabicInst ? `<div class="inst-ar">${arabicInst}</div>` : ''}
+
+                            <div class="section">
+                                <div class="field-row"><span style="width:85px;">Additional Info </span><span class="colon">:</span><span class="value">${item.AdditionalInfo || ''}</span></div>
+                            </div>
+
+                            <div class="section">
+                                <div class="field-row" style="align-items: flex-start;">
+                                    <span style="width:70px; flex-shrink:0;">Instructions </span><span class="colon">:</span>
+                                    <span class="value-wrap">${item.Instructions || ''}</span>
+                                </div>
+                                ${arabicInst ? `<div class="ar-text">التعليمات : <span style="font-weight:bold;">${arabicInst}</span></div>` : ''}
+                            </div>
                         </div>
                     `;
                 }
@@ -160,7 +167,7 @@
                 if (autoPrint) setTimeout(() => window.print(), 600);
 
             } catch (err) {
-                wrapper.innerHTML = '<p style="color:red; padding:20px;">Error: ' + err.message + '</p>';
+                wrapper.innerHTML = '<p style="color:red; padding: 20px;">Error: ' + err.message + '</p>';
             }
         })();
     </script>
