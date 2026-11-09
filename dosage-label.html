@@ -124,99 +124,96 @@
     <div id="labels-wrapper" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
 
     <script>
-        (function renderLabels() {
+        (async function renderLabels() {
             const params = new URLSearchParams(window.location.search);
             const rawData = params.get('data');
             const autoPrint = params.get('print') === '1';
             const wrapper = document.getElementById('labels-wrapper');
 
             if (!rawData) {
-                wrapper.innerHTML = '<p>No label data received. Please select an Order ID in Power Apps.</p>';
+                wrapper.innerHTML = '<p>No label data received. Please select an Order ID.</p>';
                 return;
             }
 
             try {
                 const items = JSON.parse(rawData);
-                wrapper.innerHTML = items.map(item => `
-                    <div class="label-card">
-                        <!-- Section 1: Header & Medication Info -->
-                        <div class="section">
-                            <div class="field-row">
-                                <span class="label-top">Facility Name</span>
-                                <span class="colon">:</span>
-                                <span class="value">${item.FacilityName || ''}</span>
-                            </div>
-                            <div class="field-row">
-                                <span class="label-top">Patient Name</span>
-                                <span class="colon">:</span>
-                                <span class="value">${item.PatientName || ''}</span>
-                            </div>
-                            <div class="field-row">
-                                <span class="label-top">Doctor Name</span>
-                                <span class="colon">:</span>
-                                <span class="value">${item.DoctorName || ''}</span>
-                            </div>
-                            <div class="field-row">
-                                <span class="label-top">Pharmacist Name</span>
-                                <span class="colon">:</span>
-                                <span class="value">${item.PharmacistName || ''}</span>
-                            </div>
-                            <div class="field-row">
-                                <span class="label-top">Drug Name</span>
-                                <span class="colon">:</span>
-                                <span class="value">${item.DrugName || ''}</span>
-                            </div>
-                        </div>
+                let htmlContent = '';
 
-                        <!-- Section 2: Dates, Batch & Quantity -->
-                        <div class="section grid-2-col">
-                            <div>
-                                <div class="field-row">
-                                    <span>Prescription Date :&nbsp;</span>
-                                    <span class="value">${item.PrescriptionDate || ''}</span>
+                for (const item of items) {
+                    let arabicInst = '';
+                    
+                    // 1. Fetch free Arabic translation dynamically without saving it
+                    if (item.Instructions) {
+                        try {
+                            const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(item.Instructions) + '&langpair=en|ar');
+                            const tData = await res.json();
+                            if (tData && tData.responseData && tData.responseData.translatedText) {
+                                arabicInst = tData.responseData.translatedText;
+                            }
+                        } catch (err) {
+                            console.error("Translation failed", err);
+                        }
+                    }
+
+                    // 2. Build the HTML label
+                    htmlContent += `
+                        <div class="label-card">
+                            <!-- Section 1: Header -->
+                            <div class="section">
+                                <div class="field-row"><span class="label-top">Facility Name</span><span class="colon">:</span><span class="value">${item.FacilityName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Patient Name</span><span class="colon">:</span><span class="value">${item.PatientName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Doctor Name</span><span class="colon">:</span><span class="value">${item.DoctorName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Pharmacist Name</span><span class="colon">:</span><span class="value">${item.PharmacistName || ''}</span></div>
+                                <div class="field-row"><span class="label-top">Drug Name</span><span class="colon">:</span><span class="value">${item.DrugName || ''}</span></div>
+                            </div>
+
+                            <!-- Section 2: Dates -->
+                            <div class="section grid-2-col">
+                                <div>
+                                    <div class="field-row"><span>Prescription Date :&nbsp;</span><span class="value">${item.PrescriptionDate || ''}</span></div>
+                                    <div class="field-row"><span>Expiry :&nbsp;</span><span class="value">${item.ExpiryDate || ''}</span></div>
                                 </div>
-                                <div class="field-row">
-                                    <span>Expiry :&nbsp;</span>
-                                    <span class="value">${item.ExpiryDate || ''}</span>
+                                <div>
+                                    <div class="field-row"><span>Batch :&nbsp;</span><span class="value">${item.Batch || ''}</span></div>
+                                    <div class="field-row"><span>Quantity :&nbsp;</span><span class="value">${item.Quantity ?? ''}</span></div>
                                 </div>
                             </div>
-                            <div>
-                                <div class="field-row">
-                                    <span>Batch :&nbsp;</span>
-                                    <span class="value">${item.Batch || ''}</span>
+
+                            <!-- Section 3: Additional Info -->
+                            <div class="section">
+                                <div class="field-row"><span>Additional Info :&nbsp;</span><span class="value">${item.AdditionalInfo || ''}</span></div>
+                            </div>
+
+                            <!-- Section 4: Bilingual Instructions -->
+                            <div class="section instruction-section">
+                                <div class="field-row" style="display: flex; flex-direction: column; width: 100%;">
+                                    <div style="display: flex; width: 100%; margin-bottom: 6px;">
+                                        <span>Instructions :&nbsp;</span><span class="value">${item.Instructions || ''}</span>
+                                    </div>
+                                    ${arabicInst ? `
+                                    <div style="display: flex; width: 100%; direction: rtl; text-align: right; font-size: 18px; margin-top: 4px;">
+                                        <span>التعليمات :&nbsp;</span>
+                                        <span class="value" style="font-weight: bold;">${arabicInst}</span>
+                                    </div>
+                                    ` : ''}
                                 </div>
-                                <div class="field-row">
-                                    <span>Quantity :&nbsp;</span>
-                                    <span class="value">${item.Quantity ?? ''}</span>
-                                </div>
                             </div>
                         </div>
-
-                        <!-- Section 3: Additional Info -->
-                        <div class="section">
-                            <div class="field-row">
-                                <span>Additional Info :&nbsp;</span>
-                                <span class="value">${item.AdditionalInfo || ''}</span>
-                            </div>
-                        </div>
-
-                        <!-- Section 4: Instructions -->
-                        <div class="section instruction-section">
-                            <div class="field-row">
-                                <span>Instructions :&nbsp;</span>
-                                <span class="value">${item.Instructions || ''}</span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-
-                if (autoPrint) {
-                    setTimeout(() => window.print(), 350);
+                    `;
                 }
+
+                wrapper.innerHTML = htmlContent;
+
+                // 3. Print automatically after a short delay so translations have time to render
+                if (autoPrint) {
+                    setTimeout(() => window.print(), 600);
+                }
+
             } catch (err) {
                 wrapper.innerHTML = '<p style="color:red;">Error parsing label data: ' + err.message + '</p>';
             }
         })();
     </script>
+    
 </body>
 </html>
