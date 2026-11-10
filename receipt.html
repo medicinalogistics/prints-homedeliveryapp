@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Receipt - A4</title>
+    <style>
+        /* A4 Print Layout Settings */
+        @media print {
+            @page { size: A4 portrait; margin: 15mm; }
+            body, html { background-color: #ffffff; margin: 0; padding: 0; }
+            .no-print-bar { display: none !important; }
+            .receipt-container { max-width: 100% !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
+        }
+        
+        /* Base Styling */
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f5f7; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #333; }
+        .no-print-bar { width: 100%; max-width: 210mm; display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        .btn-print { padding: 8px 18px; background-color: #0078d4; color: #fff; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        
+        /* A4 Container Preview */
+        .receipt-container {
+            width: 210mm; /* A4 Width */
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Header Layout */
+        .header-banner { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #005A9C; padding-bottom: 15px; margin-bottom: 25px; }
+        .header-banner h1 { margin: 0; font-size: 24px; color: #005A9C; text-transform: uppercase; }
+        .header-details { text-align: right; font-size: 12px; color: #555; }
+        
+        /* Details Grid */
+        .grid-2 { display: flex; justify-content: space-between; margin-bottom: 25px; gap: 20px; }
+        .info-box { width: 50%; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; background: #fdfdfd; }
+        .info-title { font-size: 14px; font-weight: bold; color: #005A9C; margin-bottom: 12px; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; text-transform: uppercase;}
+        .info-row { display: flex; margin-bottom: 6px; font-size: 12px; }
+        .info-lbl { font-weight: 600; width: 110px; color: #555; }
+        .info-val { flex-grow: 1; font-weight: 500; }
+        
+        /* Table Layout */
+        .rx-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 12px; }
+        .rx-table th { background-color: #005A9C; color: white; padding: 10px; text-align: left; font-weight: 600; border: 1px solid #004b80; }
+        .rx-table td { padding: 8px 10px; border: 1px solid #e0e0e0; }
+        .rx-table tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        /* Totals Layout */
+        .totals-container { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .totals-table { width: 320px; border-collapse: collapse; font-size: 13px; }
+        .totals-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .totals-table td:last-child { text-align: right; font-weight: bold; }
+        .totals-table tr:last-child td { font-size: 16px; color: #005A9C; border-bottom: none; border-top: 2px solid #005A9C; padding-top: 12px; }
+        
+        /* Footer */
+        .footer-notes { margin-top: 50px; font-size: 11px; color: #777; border-top: 1px solid #ddd; padding-top: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="no-print-bar">
+        <button class="btn-print" onclick="window.print()">Print A4 Receipt</button>
+    </div>
+
+    <div class="receipt-container" id="receipt-content">
+        <p style="text-align:center; padding: 40px;">Loading receipt data...</p>
+    </div>
+
+    <script>
+        (function renderReceipt() {
+            const params = new URLSearchParams(window.location.search);
+            const rawData = params.get('data');
+            const autoPrint = params.get('print') === '1';
+            const wrapper = document.getElementById('receipt-content');
+
+            if (!rawData) {
+                wrapper.innerHTML = '<p style="text-align:center; color:red;">No receipt data received.</p>';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(rawData);
+
+                // Build Table Rows
+                let tableRows = '';
+                if (data.Lines && data.Lines.length > 0) {
+                    data.Lines.forEach(line => {
+                        tableRows += `
+                            <tr>
+                                <td><b>${line.ItemDescription || ''}</b></td>
+                                <td>${line.Qty || ''}</td>
+                                <td>AED ${line.UnitPrice || '0.00'}</td>
+                                <td>AED ${line.InsCover || '0.00'}</td>
+                                <td>AED ${line.Copay || '0.00'}</td>
+                                <td>AED ${line.Total || '0.00'}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableRows = `<tr><td colspan="6" style="text-align:center;">No medications found</td></tr>`;
+                }
+
+                // Inject Data into HTML structure
+                wrapper.innerHTML = `
+                    <div class="header-banner">
+                        <div>
+                            <h1>Insurance Receipt</h1>
+                            <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">${data.FacilityName || ''}</div>
+                        </div>
+                        <div class="header-details">
+                            <div><b>Order ID:</b> ${data.OrderID || ''}</div>
+                            <div><b>Date:</b> ${data.PrintDate || ''}</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="info-box">
+                            <div class="info-title">Patient Details</div>
+                            <div class="info-row"><div class="info-lbl">Patient Name:</div><div class="info-val">${data.PatientName || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">Emirates ID:</div><div class="info-val">${data.EmiratesID || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">Mobile:</div><div class="info-val">${data.Mobile || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">Email:</div><div class="info-val">${data.Email || ''}</div></div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-title">Delivery Details</div>
+                            <div class="info-row"><div class="info-lbl">Address:</div><div class="info-val">${data.DeliveryAddress || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">City/Emirate:</div><div class="info-val">${data.City || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">Order Source:</div><div class="info-val">${data.OrderSource || ''}</div></div>
+                            <div class="info-row"><div class="info-lbl">Payment Status:</div><div class="info-val">${data.PaymentStatus || ''}</div></div>
+                        </div>
+                    </div>
+
+                    <table class="rx-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%;">Medication / Item</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Ins. Cover</th>
+                                <th>Patient Copay</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+
+                    <div class="totals-container">
+                        <table class="totals-table">
+                            <tr>
+                                <td>Total Insurance Coverage:</td>
+                                <td>AED ${data.TotalInsurance || '0.00'}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Patient Copay:</td>
+                                <td>AED ${data.TotalPatientShare || '0.00'}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Total Paid Amount:</b></td>
+                                <td>AED ${data.TotalPatientShare || '0.00'}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="footer-notes">
+                        This is a computer-generated receipt for insurance claim and record purposes. <br>
+                        For any inquiries, please contact our support team.
+                    </div>
+                `;
+
+                // Auto-print logic
+                if (autoPrint) {
+                    setTimeout(() => window.print(), 500);
+                }
+
+            } catch (err) {
+                wrapper.innerHTML = `<p style="color:red; text-align:center;">Error parsing data: ${err.message}</p>`;
+            }
+        })();
+    </script>
+</body>
+</html>
